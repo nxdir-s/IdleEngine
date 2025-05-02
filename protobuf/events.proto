@@ -1,0 +1,14 @@
+syntax = "proto3";
+package IdleEngine;
+
+// import "google/protobuf/timestamp.proto";
+
+option go_package = "protobuf/";
+
+message UserEvent {
+    int32 id = 1;
+}
+
+message UserUpdate {
+    int32 id = 1;
+}

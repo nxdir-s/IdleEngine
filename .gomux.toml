@@ -1,0 +1,8 @@
+session = 'IdleEngine'
+start_index = 0
+
+[windows]
+
+[windows.editor]
+name = 'editor'
+cmd = ['vim .']
