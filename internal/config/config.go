@@ -16,7 +16,7 @@ type ConfigOpt func(c *Config) error
 func WithListenerAddr() ConfigOpt {
 	return func(c *Config) error {
 		listenerAddr := os.Getenv("LISTENER_ADDRESS")
-		if listenerAddr == "" {
+		if len(listenerAddr) == 0 {
 			return &ErrMissingEnv{"LISTENER_ADDRESS"}
 		}
 
@@ -30,7 +30,7 @@ func WithListenerAddr() ConfigOpt {
 func WithBrokers() ConfigOpt {
 	return func(c *Config) error {
 		brokers := os.Getenv("BROKERS")
-		if brokers == "" {
+		if len(brokers) == 0 {
 			return &ErrMissingEnv{"BROKERS"}
 		}
 
@@ -44,7 +44,7 @@ func WithBrokers() ConfigOpt {
 func WithOtelServiceName() ConfigOpt {
 	return func(c *Config) error {
 		serviceName := os.Getenv("OTEL_SERVICE_NAME")
-		if serviceName == "" {
+		if len(serviceName) == 0 {
 			return &ErrMissingEnv{"OTEL_SERVICE_NAME"}
 		}
 
@@ -58,7 +58,7 @@ func WithOtelServiceName() ConfigOpt {
 func WithOtelEndpoint() ConfigOpt {
 	return func(c *Config) error {
 		otelEndpoint := os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT")
-		if otelEndpoint == "" {
+		if len(otelEndpoint) == 0 {
 			return &ErrMissingEnv{"OTEL_EXPORTER_OTLP_ENDPOINT"}
 		}
 
@@ -72,7 +72,7 @@ func WithOtelEndpoint() ConfigOpt {
 func WithProfileURL() ConfigOpt {
 	return func(c *Config) error {
 		profileUrl := os.Getenv("PROFILE_URL")
-		if profileUrl == "" {
+		if len(profileUrl) == 0 {
 			return &ErrMissingEnv{"PROFILE_URL"}
 		}
 
@@ -86,7 +86,7 @@ func WithProfileURL() ConfigOpt {
 func WithConsumerName() ConfigOpt {
 	return func(c *Config) error {
 		name := os.Getenv("CONSUMER_GROUP_NAME")
-		if name == "" {
+		if len(name) == 0 {
 			return &ErrMissingEnv{"CONSUMER_GROUP_NAME"}
 		}
 
