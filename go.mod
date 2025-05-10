@@ -3,6 +3,7 @@ module github.com/nxdir-s/IdleEngine
 go 1.24.2
 
 require (
+	github.com/coder/websocket v1.8.13
 	github.com/gobwas/ws v1.4.0
 	github.com/grafana/pyroscope-go v1.2.2
 	github.com/jackc/pgx/v5 v5.7.4
