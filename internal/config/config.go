@@ -40,34 +40,6 @@ func WithBrokers() ConfigOpt {
 	}
 }
 
-// WithRedPandaUsr checks the env for REDPANDA_SASL_USERNAME
-func WithRedPandaUsr() ConfigOpt {
-	return func(c *Config) error {
-		rpUser := os.Getenv("REDPANDA_SASL_USERNAME")
-		if rpUser == "" {
-			return &ErrMissingEnv{"REDPANDA_SASL_USERNAME"}
-		}
-
-		c.RedPandaUsr = rpUser
-
-		return nil
-	}
-}
-
-// WithRedPandaPass checks the env for REDPANDA_SASL_PASSWORD
-func WithRedPandaPass() ConfigOpt {
-	return func(c *Config) error {
-		rpPass := os.Getenv("REDPANDA_SASL_PASSWORD")
-		if rpPass == "" {
-			return &ErrMissingEnv{"REDPANDA_SASL_PASSWORD"}
-		}
-
-		c.RedPandaPass = rpPass
-
-		return nil
-	}
-}
-
 // WithOtelServiceName checks the env for OTEL_SERVICE_NAME
 func WithOtelServiceName() ConfigOpt {
 	return func(c *Config) error {
@@ -110,34 +82,6 @@ func WithProfileURL() ConfigOpt {
 	}
 }
 
-// WithGrafanaUsr checks the env for GCLOUD_USER
-func WithGrafanaUsr() ConfigOpt {
-	return func(c *Config) error {
-		gcUser := os.Getenv("GCLOUD_USER")
-		if gcUser == "" {
-			return &ErrMissingEnv{"GCLOUD_USER"}
-		}
-
-		c.GrafanaUsr = gcUser
-
-		return nil
-	}
-}
-
-// WithGrafanaPass checks the env for GCLOUD_PASSWORD
-func WithGrafanaPass() ConfigOpt {
-	return func(c *Config) error {
-		gcPass := os.Getenv("GCLOUD_PASSWORD")
-		if gcPass == "" {
-			return &ErrMissingEnv{"GCLOUD_PASSWORD"}
-		}
-
-		c.GrafanaPass = gcPass
-
-		return nil
-	}
-}
-
 // WithConsumerName checks the env for CONSUMER_GROUP_NAME
 func WithConsumerName() ConfigOpt {
 	return func(c *Config) error {
@@ -155,13 +99,9 @@ func WithConsumerName() ConfigOpt {
 type Config struct {
 	ListenerAddr string
 	Brokers      string
-	RedPandaUsr  string
-	RedPandaPass string
 	OtelService  string
 	OtelEndpoint string
 	ProfileURL   string
-	GrafanaUsr   string
-	GrafanaPass  string
 	ConsumerName string
 }
 

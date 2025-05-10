@@ -8,7 +8,6 @@ import (
 	"github.com/nxdir-s/IdleEngine/internal/adapters/secondary/franz"
 	"github.com/nxdir-s/IdleEngine/internal/util"
 	"github.com/twmb/franz-go/pkg/kgo"
-	"github.com/twmb/franz-go/pkg/sasl/scram"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
 	"google.golang.org/protobuf/proto"
@@ -32,12 +31,11 @@ func (e *ErrProtoMarshal) Error() string {
 
 type FranzAdapterOpt func(a *FranzAdapter) error
 
-func WithConsumer(topic string, groupname string, brokers []string, username string, pass string) FranzAdapterOpt {
+func WithConsumer(topic string, groupname string, brokers []string) FranzAdapterOpt {
 	return func(a *FranzAdapter) error {
 		client, err := kgo.NewClient(
 			kgo.SeedBrokers(brokers...),
 			kgo.DialTLSConfig(&tls.Config{}),
-			kgo.SASL(scram.Auth{User: username, Pass: pass}.AsSha256Mechanism()),
 			kgo.ConsumerGroup(groupname),
 			kgo.ConsumeTopics(topic),
 			kgo.ConsumeResetOffset(kgo.NewOffset().AtStart()),
@@ -56,12 +54,11 @@ func WithConsumer(topic string, groupname string, brokers []string, username str
 	}
 }
 
-func WithProducer(brokers []string, username string, pass string) FranzAdapterOpt {
+func WithProducer(brokers []string) FranzAdapterOpt {
 	return func(a *FranzAdapter) error {
 		client, err := kgo.NewClient(
 			kgo.SeedBrokers(brokers...),
 			kgo.DialTLSConfig(&tls.Config{}),
-			kgo.SASL(scram.Auth{User: username, Pass: pass}.AsSha256Mechanism()),
 		)
 		if err != nil {
 			return err
