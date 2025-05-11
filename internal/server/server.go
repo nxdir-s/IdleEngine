@@ -71,6 +71,11 @@ func (gs *GameServer) Start(ctx context.Context) {
 	}
 }
 
+// Shutdown closes the network listener
+func (gs *GameServer) Shutdown() error {
+	return gs.listener.Close()
+}
+
 // listen waits for incoming client messages
 func (gs *GameServer) listen(ctx context.Context) {
 	for {

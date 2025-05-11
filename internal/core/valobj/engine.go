@@ -4,8 +4,8 @@ import "context"
 
 type Event struct {
 	Ctx      context.Context
-	Msg      *Message
 	Consumed chan struct{}
+	Msg      *Message
 }
 
 type Message struct {

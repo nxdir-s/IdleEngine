@@ -33,12 +33,7 @@ type Epoll struct {
 }
 
 // NewEpoll creates an Epoll
-func NewEpoll(pool *Pool, logger *slog.Logger, tracer trace.Tracer) (*Epoll, error) {
-	fd, err := unix.EpollCreate1(0)
-	if err != nil {
-		return nil, &ErrEpoll{err}
-	}
-
+func NewEpoll(fd int, pool *Pool, logger *slog.Logger, tracer trace.Tracer) *Epoll {
 	return &Epoll{
 		fd:     fd,
 		pool:   pool,
@@ -46,7 +41,7 @@ func NewEpoll(pool *Pool, logger *slog.Logger, tracer trace.Tracer) (*Epoll, err
 		logger: logger,
 		Add:    make(chan net.Conn, ClientBuffer),
 		Remove: make(chan *Client, ClientBuffer),
-	}, nil
+	}
 }
 
 // Start adds and removes connections from Epoll
