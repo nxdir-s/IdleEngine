@@ -29,7 +29,7 @@ func NewConsumerAdapter(events ports.Events, tracer trace.Tracer) *ConsumerAdapt
 }
 
 func (a *ConsumerAdapter) ProcessUserEvent(ctx context.Context, event *protobuf.UserEvent) error {
-	ctx, span := a.tracer.Start(ctx, "consumer process.userevent")
+	ctx, span := a.tracer.Start(ctx, "consumer userevent")
 	defer span.End()
 
 	if err := a.events.HandleUserEvent(ctx, event); err != nil {

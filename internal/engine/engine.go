@@ -126,10 +126,10 @@ func (ngin *GameEngine) Simulate(ctx context.Context, client *server.Client) pro
 
 func (ngin *GameEngine) buildEvent(ctx context.Context, t time.Time) *valobj.Event {
 	return &valobj.Event{
-		Ctx: ctx,
+		Ctx:      ctx,
+		Consumed: make(chan struct{}),
 		Msg: &valobj.Message{
 			Value: "server tick: " + t.UTC().String(),
 		},
-		Consumed: make(chan struct{}),
 	}
 }

@@ -16,6 +16,7 @@ import (
 	"github.com/nxdir-s/IdleEngine/internal/ports"
 	"github.com/nxdir-s/IdleEngine/internal/server"
 	"go.opentelemetry.io/otel"
+	"golang.org/x/sys/unix"
 )
 
 func main() {
@@ -80,14 +81,15 @@ func main() {
 	}
 	defer kafka.Close()
 
-	pool := server.NewPool(ctx, logger, otel.Tracer("pool"))
-	ngin := engine.NewGameEngine(pool, kafka, logger, otel.Tracer("engine"))
-
-	epoll, err := server.NewEpoll(pool, logger, otel.Tracer("epoll"))
+	fd, err := unix.EpollCreate1(0)
 	if err != nil {
 		logger.Error("failed to create epoll", slog.Any("err", err))
 		os.Exit(1)
 	}
+
+	pool := server.NewPool(ctx, logger, otel.Tracer("pool"))
+	epoll := server.NewEpoll(fd, pool, logger, otel.Tracer("epoll"))
+	ngin := engine.NewGameEngine(pool, kafka, logger, otel.Tracer("engine"))
 
 	server := server.NewGameServer(ctx, listener, epoll, ngin, pool, logger)
 
@@ -97,7 +99,11 @@ func main() {
 
 	select {
 	case <-ctx.Done():
-		logger.Info(ctx.Err().Error())
-		os.Exit(0)
+		logger.Warn(ctx.Err().Error())
+	}
+
+	if err := server.Shutdown(); err != nil {
+		logger.Error(err.Error())
+		os.Exit(1)
 	}
 }

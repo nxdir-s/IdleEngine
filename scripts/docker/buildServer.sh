@@ -1,1 +1,1 @@
-docker build . --no-cache -t idlegame -f cmd/server/Dockerfile
+docker build . --no-cache -t gameserver -f cmd/server/Dockerfile
