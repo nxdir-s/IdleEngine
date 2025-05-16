@@ -18,13 +18,16 @@ services:
   gameserver:
     image: gameserver:latest
     container_name: gameserver
+    build:
+      context: .
+      dockerfile: ./cmd/server/Dockerfile
     ports:
       - 3000:3000
-      - 6060:6060
     restart: unless-stopped
     environment:
       BROKERS: kafka-1:19092,kafka-2:19092,kafka-3:19092
       LISTENER_ADDRESS: 0.0.0.0:3000
+      USER_EVENTS_TOPIC: user.events
     depends_on:
       - kafka-1
       - kafka-2
@@ -184,26 +187,10 @@ services:
       - controller-2
       - controller-3
 
-  # kafka-ui:
-  #   image: provectuslabs/kafka-ui:master
-  #   container_name: kafka-ui
-  #   restart: unless-stopped
-  #   ports:
-  #     - 9000:9000
-  #   environment:
-  #     KAFKA_CLUSTERS_0_NAME: local
-  #     KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka-1:19092,kafka-2:19092,kafka-3:19092
-  #   depends_on:
-  #     - kafka-1
-  #     - kafka-2
-  #     - kafka-3
-
   console:
     image: docker.redpanda.com/redpandadata/console:v3.1.0
-    container_name: redpanda-console
+    container_name: kconsole
     restart: unless-stopped
-    # networks:
-    #   - idlegame
     entrypoint: /bin/sh
     command: -c 'echo "$$CONSOLE_CONFIG_FILE" > /tmp/config.yml && /app/console'
     volumes:
@@ -215,23 +202,9 @@ services:
         # See https://docs.redpanda.com/current/console/config/connect-to-redpanda/
         kafka:
           brokers: ["kafka-1:19092", "kafka-2:19092", "kafka-3:19092"]
-        authentication:
-          jwtSigningKey: vazxnT+ZHtxKslK6QlDGovcYnSjTk/lKMmZ+mHrBVE+YdVDkLgSuP6AszAKe9Gvq
-          basic:
-            enabled: true
-        authorization:
-          roleBindings:
-          - roleName: admin
-            users:
-              - loginType: basic
-                name: superuser
     ports:
-      - 9000:9000
+      - 9000:8080
     depends_on:
       - kafka-1
       - kafka-2
       - kafka-3
-networks:
-  default:
-    external: true
-    name: idlegame

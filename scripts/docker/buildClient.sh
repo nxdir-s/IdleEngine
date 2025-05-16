@@ -1,1 +1,1 @@
-docker build . --no-cache -t ws-client -f cmd/client/Dockerfile
+docker build . --no-cache -t wsclient -f cmd/client/Dockerfile

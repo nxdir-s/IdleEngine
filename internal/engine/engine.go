@@ -26,10 +26,10 @@ type GameEngine struct {
 	kafka    ports.Kafka
 	pool     *server.Pool
 	ticker   *time.Ticker
-	sigusr1  chan os.Signal
-	isPaused bool
 	tracer   trace.Tracer
 	logger   *slog.Logger
+	sigusr1  chan os.Signal
+	isPaused bool
 }
 
 // NewGameEngine creates a GameEngine

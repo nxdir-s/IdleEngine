@@ -2,7 +2,6 @@ package secondary
 
 import (
 	"context"
-	"crypto/tls"
 	"log/slog"
 
 	"github.com/nxdir-s/IdleEngine/internal/adapters/secondary/franz"
@@ -35,7 +34,6 @@ func WithConsumer(topic string, groupname string, brokers []string) FranzAdapter
 	return func(a *FranzAdapter) error {
 		client, err := kgo.NewClient(
 			kgo.SeedBrokers(brokers...),
-			kgo.DialTLSConfig(&tls.Config{}),
 			kgo.ConsumerGroup(groupname),
 			kgo.ConsumeTopics(topic),
 			kgo.ConsumeResetOffset(kgo.NewOffset().AtStart()),
@@ -54,16 +52,16 @@ func WithConsumer(topic string, groupname string, brokers []string) FranzAdapter
 	}
 }
 
-func WithProducer(brokers []string) FranzAdapterOpt {
+func WithProducer(topic string, brokers []string) FranzAdapterOpt {
 	return func(a *FranzAdapter) error {
 		client, err := kgo.NewClient(
 			kgo.SeedBrokers(brokers...),
-			kgo.DialTLSConfig(&tls.Config{}),
 		)
 		if err != nil {
 			return err
 		}
 
+		a.topic = topic
 		a.client = client
 
 		return nil
@@ -95,6 +93,7 @@ func NewFranzAdapter(logger *slog.Logger, tracer trace.Tracer, opts ...FranzAdap
 
 func (a *FranzAdapter) Send(ctx context.Context, record protoreflect.ProtoMessage) error {
 	if a.client == nil {
+		a.logger.Error("nil client in FranzAdapter")
 		return nil
 	}
 
@@ -111,11 +110,18 @@ func (a *FranzAdapter) Send(ctx context.Context, record protoreflect.ProtoMessag
 
 	data, err := proto.Marshal(record)
 	if err != nil {
+		a.logger.Error("error encoding record",
+			slog.Any("err", err),
+			slog.String("topic", a.topic),
+		)
+
 		err = &ErrProtoMarshal{err}
 		util.RecordError(span, "error encoding "+a.topic+" record", err)
 
 		return err
 	}
+
+	a.logger.Debug("sending kafka record")
 
 	a.client.Produce(ctx, &kgo.Record{Topic: a.topic, Value: data}, nil)
 
@@ -124,6 +130,7 @@ func (a *FranzAdapter) Send(ctx context.Context, record protoreflect.ProtoMessag
 
 func (a *FranzAdapter) Consume(ctx context.Context, consumer franz.Consumer) {
 	if a.client == nil {
+		a.logger.Error("nil client in FranzAdapter")
 		return
 	}
 

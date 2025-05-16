@@ -1,6 +1,9 @@
 package config
 
-import "os"
+import (
+	"os"
+	"strconv"
+)
 
 type ErrMissingEnv struct {
 	envVar string
@@ -96,13 +99,63 @@ func WithConsumerName() ConfigOpt {
 	}
 }
 
+// WithUserEventsTopic checks the env for USER_EVENTS_TOPIC
+func WithUserEventsTopic() ConfigOpt {
+	return func(c *Config) error {
+		topic := os.Getenv("USER_EVENTS_TOPIC")
+		if len(topic) == 0 {
+			return &ErrMissingEnv{"USER_EVENTS_TOPIC"}
+		}
+
+		c.UserEventsTopic = topic
+
+		return nil
+	}
+}
+
+// WithWSAddress checks the env for WS_ADDRESS
+func WithWSAddress() ConfigOpt {
+	return func(c *Config) error {
+		address := os.Getenv("WS_ADDRESS")
+		if len(address) == 0 {
+			return &ErrMissingEnv{"WS_ADDRESS"}
+		}
+
+		c.WSAddress = address
+
+		return nil
+	}
+}
+
+// WithMaxWSClients checks the env for MAX_WS_CLIENTS
+func WithMaxWSClients() ConfigOpt {
+	return func(c *Config) error {
+		maxClients := os.Getenv("MAX_WS_CLIENTS")
+		if len(maxClients) == 0 {
+			return &ErrMissingEnv{"MAX_WS_CLIENTS"}
+		}
+
+		maxClientsInt, err := strconv.Atoi(maxClients)
+		if err != nil {
+			return err
+		}
+
+		c.MaxWSClients = maxClientsInt
+
+		return nil
+	}
+}
+
 type Config struct {
-	ListenerAddr string
-	Brokers      string
-	OtelService  string
-	OtelEndpoint string
-	ProfileURL   string
-	ConsumerName string
+	ListenerAddr    string
+	Brokers         string
+	OtelService     string
+	OtelEndpoint    string
+	ProfileURL      string
+	ConsumerName    string
+	UserEventsTopic string
+	WSAddress       string
+	MaxWSClients    int
 }
 
 func New(opts ...ConfigOpt) (*Config, error) {
