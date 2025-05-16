@@ -2,10 +2,11 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"io"
+	"log/slog"
 	"os"
 	"os/signal"
+	"strconv"
 	"sync"
 	"time"
 
@@ -13,35 +14,51 @@ import (
 )
 
 const (
-	MaxClients int = 500
+	DefaultMaxClients int = 50
 )
 
 func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer cancel()
 
+	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
+	slog.SetDefault(logger)
+
 	if len(os.Args) < 2 {
-		fmt.Fprint(os.Stdout, "please provide an address\n")
+		logger.Error("please provide an address")
 		os.Exit(1)
 	}
 
+	var maxClients int
+	maxClients = DefaultMaxClients
+
+	if len(os.Args) == 3 {
+		maxClientArg, err := strconv.Atoi(os.Args[2])
+		if err != nil {
+			logger.Error(err.Error())
+			os.Exit(1)
+		}
+
+		maxClients = maxClientArg
+	}
+
 	var wg sync.WaitGroup
-	for range MaxClients {
+	for range maxClients {
 		time.Sleep(80 * time.Millisecond)
 
 		wg.Add(1)
-		go startWS(ctx, &wg, os.Args[1])
+		go startWS(ctx, &wg, os.Args[1], logger)
 	}
 
 	wg.Wait()
 }
 
-func startWS(ctx context.Context, wg *sync.WaitGroup, addr string) {
+func startWS(ctx context.Context, wg *sync.WaitGroup, addr string, logger *slog.Logger) {
 	defer wg.Done()
 
 	conn, _, err := websocket.Dial(ctx, addr, nil)
 	if err != nil {
-		fmt.Fprintf(os.Stdout, "failed to dial websocket: %s\n", err.Error())
+		logger.Error("failed to dial websocket", slog.String("err", err.Error()))
 		return
 	}
 	defer conn.CloseNow()
@@ -54,24 +71,24 @@ func startWS(ctx context.Context, wg *sync.WaitGroup, addr string) {
 		default:
 			msgType, r, err := conn.Reader(ctx)
 			if err != nil {
-				fmt.Fprintf(os.Stdout, "failed to get reader from connection: %s\n", err.Error())
+				logger.Error("failed to get reader from connection", slog.String("err", err.Error()))
 				return
 			}
 
 			var msg []byte
 			msg, err = io.ReadAll(r)
 			if err != nil {
-				fmt.Fprintf(os.Stdout, "failed reading message: %s\n", err.Error())
+				logger.Error("failed reading message", slog.String("err", err.Error()))
 				return
 			}
 
 			switch msgType {
 			case websocket.MessageText:
-				fmt.Fprintf(os.Stdout, "recieved message: %s\n", string(msg))
+				logger.Info(string(msg))
 			case websocket.MessageBinary:
-				fmt.Fprint(os.Stdout, "recieved binary message\n")
+				logger.Info("recieved binary message")
 			default:
-				fmt.Fprintf(os.Stdout, "unknown websocket frame type: %d\n", msgType)
+				logger.Warn("unknown websocket frame type", slog.Any("msgType", msgType))
 				return
 			}
 		}

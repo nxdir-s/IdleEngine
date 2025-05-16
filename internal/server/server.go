@@ -42,7 +42,7 @@ func NewGameServer(ctx context.Context, ln net.Listener, epoll *Epoll, ngin Star
 	return server
 }
 
-// Start listens for incoming tcp connections
+// Start runs the gameserver and listens for incoming tcp connections
 func (gs *GameServer) Start(ctx context.Context) {
 	go gs.listen(ctx)
 

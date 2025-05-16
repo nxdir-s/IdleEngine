@@ -41,6 +41,7 @@ func main() {
 	cfg, err := config.New(
 		config.WithListenerAddr(),
 		config.WithBrokers(),
+		config.WithUserEventsTopic(),
 	)
 	if err != nil {
 		logger.Error(err.Error())
@@ -73,7 +74,7 @@ func main() {
 	kafka, err = secondary.NewFranzAdapter(
 		logger,
 		otel.Tracer("kafka.franz"),
-		secondary.WithProducer(strings.Split(cfg.Brokers, ",")),
+		secondary.WithProducer(cfg.UserEventsTopic, strings.Split(cfg.Brokers, ",")),
 	)
 	if err != nil {
 		logger.Error("failed to create kafka adapter", slog.Any("err", err))

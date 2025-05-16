@@ -12,7 +12,4 @@ WORKDIR /app
 
 COPY --from=builder /app/bootstrap /app/bootstrap
 
-EXPOSE 3000
-EXPOSE 6060
-
-CMD ["/app/bootstrap", "ws://127.0.0.1:3000/ws"]
+CMD ["/app/bootstrap"]

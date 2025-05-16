@@ -61,6 +61,8 @@ func (p *Pool) Start(ctx context.Context) {
 		case <-ctx.Done():
 			return
 		case client := <-p.Register:
+			_, span := p.tracer.Start(ctx, "pool register")
+
 			// using counter for testing
 			p.counter++
 			client.User.Id = p.counter
@@ -68,9 +70,14 @@ func (p *Pool) Start(ctx context.Context) {
 			p.Connections[client.Fd] = client
 
 			p.logger.Info("added client to pool", slog.Int("connections", len(p.Connections)))
+			span.End()
 		case fd := <-p.Remove:
+			_, span := p.tracer.Start(ctx, "pool remove")
+
 			delete(p.Connections, fd)
+
 			p.logger.Info("removed client from pool", slog.Int("connections", len(p.Connections)))
+			span.End()
 		case event := <-p.EpollEvents:
 			_, span := p.tracer.Start(ctx, "pool epollevents")
 
