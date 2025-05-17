@@ -66,8 +66,7 @@ func (e *Epoll) Start(ctx context.Context) {
 func (e *Epoll) Wait() ([]*Client, error) {
 	events := make([]unix.EpollEvent, 100)
 
-	_, err := unix.EpollWait(e.fd, events, 100)
-	if err != nil {
+	if _, err := unix.EpollWait(e.fd, events, 100); err != nil {
 		if err == unix.EINTR {
 			return nil, nil
 		}
