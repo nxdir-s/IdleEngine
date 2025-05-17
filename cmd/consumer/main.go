@@ -28,6 +28,7 @@ func main() {
 	cfg, err := config.New(
 		config.WithBrokers(),
 		config.WithConsumerName(),
+		config.WithUserEventsTopic(),
 	)
 	if err != nil {
 		logger.Error(err.Error())
@@ -48,12 +49,12 @@ func main() {
 	// }
 	// defer cleanup(ctx)
 
-	var pgxPool secondary.PgxPool
-	pgxPool, err = secondary.NewPgxPool(ctx, "dbUrl")
-	if err != nil {
-		logger.Error(err.Error())
-		os.Exit(1)
-	}
+	// var pgxPool secondary.PgxPool
+	// pgxPool, err = secondary.NewPgxPool(ctx, "dbUrl")
+	// if err != nil {
+	// 	logger.Error(err.Error())
+	// 	os.Exit(1)
+	// }
 
 	// secondary adapters
 	var database ports.Database
@@ -73,7 +74,7 @@ func main() {
 		logger,
 		otel.Tracer("kafka.franz"),
 		secondary.WithConsumer(
-			"user.events",
+			cfg.UserEventsTopic,
 			cfg.ConsumerName,
 			strings.Split(cfg.Brokers, ","),
 		),
@@ -83,14 +84,14 @@ func main() {
 		os.Exit(1)
 	}
 
-	database = secondary.NewPostgresAdapter(pgxPool, logger, otel.Tracer("postgres"))
+	database = secondary.NewPostgresAdapter(nil, logger, otel.Tracer("postgres"))
 
 	userService = service.NewUserService(database)
 
 	users = domain.NewUsers(userService)
 	events = domain.NewEvents(users)
 
-	adapter = primary.NewConsumerAdapter(events, otel.Tracer("consumer.userevents"))
+	adapter = primary.NewConsumerAdapter(events, logger, otel.Tracer("consumer.userevents"))
 
 	consumer := consumers.NewUserEvents(kafka, adapter, logger)
 	defer consumer.Close()
