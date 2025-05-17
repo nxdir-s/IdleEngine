@@ -275,7 +275,7 @@ func (a *FranzAdapter) CreateTopic(ctx context.Context, topic string) error {
 
 	a.logger.Info("creating kafka topic", slog.String("topic", topic))
 
-	if _, err := kadm.NewClient(a.client).CreateTopic(ctx, 1, -1, nil, topic); err != nil {
+	if _, err := adminClient.CreateTopic(ctx, 1, -1, nil, topic); err != nil {
 		a.logger.Error("failed to create kafka topic",
 			slog.String("err", err.Error()),
 			slog.String("topic", topic),
