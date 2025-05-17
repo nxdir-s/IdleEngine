@@ -12,6 +12,7 @@ type Kafka interface {
 	Send(ctx context.Context, record protoreflect.ProtoMessage) error
 	Consume(ctx context.Context, consumer franz.Consumer)
 	Close() error
+	CreateTopic(ctx context.Context, topic string) error
 }
 
 type Database interface {

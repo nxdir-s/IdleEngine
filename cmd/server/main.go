@@ -82,6 +82,11 @@ func main() {
 	}
 	defer kafka.Close()
 
+	if err = kafka.CreateTopic(ctx, cfg.UserEventsTopic); err != nil {
+		logger.Error(err.Error())
+		os.Exit(1)
+	}
+
 	fd, err := unix.EpollCreate1(0)
 	if err != nil {
 		logger.Error("failed to create epoll", slog.Any("err", err))
