@@ -9,7 +9,7 @@ services:
         target: /etc/nginx/conf.d/default.conf
         read_only: true
     ports:
-      - 8080:80
+      - 80:80
     restart: unless-stopped
     depends_on:
       - gameserver
@@ -203,7 +203,7 @@ services:
         kafka:
           brokers: ["kafka-1:19092", "kafka-2:19092", "kafka-3:19092"]
     ports:
-      - 9000:8080
+      - 8080:8080
     depends_on:
       - kafka-1
       - kafka-2
