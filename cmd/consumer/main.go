@@ -43,7 +43,7 @@ func main() {
 
 	// cleanup, err := telemetry.InitProviders(ctx, otelCfg)
 	// if err != nil {
-	// 	logger.Error("failed to initialize telemetry", slog.Any("err", err))
+	// 	logger.Error("failed to initialize telemetry", slog.String("err", err.Error()))
 	// 	os.Exit(1)
 	// }
 	// defer cleanup(ctx)
@@ -79,7 +79,7 @@ func main() {
 		),
 	)
 	if err != nil {
-		logger.Error("failed to create kafka adapter", slog.Any("err", err))
+		logger.Error("failed to create kafka adapter", slog.String("err", err.Error()))
 		os.Exit(1)
 	}
 

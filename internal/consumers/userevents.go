@@ -63,7 +63,7 @@ func (c *UserEvents) Close() {
 	if err := c.kafka.Close(); err != nil {
 		c.logger.Error("error closing consumer",
 			slog.String("topic", c.topic),
-			slog.Any("err", err),
+			slog.String("err", err.Error()),
 		)
 	}
 }

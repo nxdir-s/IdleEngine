@@ -141,7 +141,7 @@ func (a *FranzAdapter) Send(ctx context.Context, record protoreflect.ProtoMessag
 
 	a.client.Produce(ctx, &kgo.Record{Topic: a.topic, Value: data}, func(_ *kgo.Record, err error) {
 		if err != nil {
-			a.logger.Error("record had a produce error", slog.Any("err", err))
+			a.logger.Error("record had a produce error", slog.String("err", err.Error()))
 		}
 	})
 
