@@ -10,17 +10,12 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-const (
-	DefaultUserEventsTopic string = "user.events"
-)
-
 type UserEventsOpts func(c *UserEvents)
 
 type UserEvents struct {
 	kafka   ports.Kafka
 	adapter ports.Consumer
 	logger  *slog.Logger
-	topic   string
 }
 
 func NewUserEvents(kafka ports.Kafka, adapter ports.Consumer, logger *slog.Logger, opts ...UserEventsOpts) *UserEvents {
@@ -28,7 +23,6 @@ func NewUserEvents(kafka ports.Kafka, adapter ports.Consumer, logger *slog.Logge
 		kafka:   kafka,
 		adapter: adapter,
 		logger:  logger,
-		topic:   DefaultUserEventsTopic,
 	}
 
 	for _, opt := range opts {
@@ -39,10 +33,7 @@ func NewUserEvents(kafka ports.Kafka, adapter ports.Consumer, logger *slog.Logge
 }
 
 func (c *UserEvents) Start(ctx context.Context) {
-	c.logger.Info("starting consumer",
-		slog.String("topic", c.topic),
-	)
-
+	c.logger.Info("starting userevents consumer")
 	c.kafka.Consume(ctx, c)
 }
 
@@ -56,13 +47,10 @@ func (c *UserEvents) Process(ctx context.Context, record *kgo.Record) error {
 }
 
 func (c *UserEvents) Close() {
-	c.logger.Info("closing consumer",
-		slog.String("topic", c.topic),
-	)
+	c.logger.Info("closing userevents consumer")
 
 	if err := c.kafka.Close(); err != nil {
-		c.logger.Error("error closing consumer",
-			slog.String("topic", c.topic),
+		c.logger.Error("error closing userevents consumer",
 			slog.String("err", err.Error()),
 		)
 	}
