@@ -32,31 +32,6 @@ services:
       - kafka-1
       - kafka-2
       - kafka-3
-      # - database
-
-  # database:
-  #   image: postgres:latest
-  #   container_name: postgres
-  #   restart: unless-stopped
-  #   # set shared memory limit when using docker-compose
-  #   shm_size: 128mb
-  #   # or set shared memory limit when deploy via swarm stack
-  #   #volumes:
-  #   #  - type: tmpfs
-  #   #    target: /dev/shm
-  #   #    tmpfs:
-  #   #      size: 134217728 # 128*2^20 bytes = 128Mb
-  #   volumes:
-  #     - ./scripts/init.sql:/docker-entrypoint-initdb.d/init.sql
-  #   environment:
-  #     - POSTGRES_PASSWORD=example
-  #   expose:
-  #     - 5432
-  #   healthcheck:
-  #     test: ["CMD", "pg_isready"]
-  #     interval: 10s
-  #     timeout: 5s
-  #     retries: 5
 
   controller-1:
     image: apache/kafka:latest
