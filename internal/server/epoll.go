@@ -52,11 +52,11 @@ func (e *Epoll) Start(ctx context.Context) {
 			return
 		case conn := <-e.Add:
 			if err := e.add(ctx, conn); err != nil {
-				e.logger.Error("failed to add connection", slog.String("err", err.Error()))
+				e.logger.Warn("failed to add connection", slog.String("err", err.Error()))
 			}
 		case client := <-e.Remove:
 			if err := e.remove(ctx, client); err != nil {
-				e.logger.Error("failed to remove connection", slog.String("err", err.Error()))
+				e.logger.Warn("failed to remove connection", slog.String("err", err.Error()))
 			}
 		}
 	}
