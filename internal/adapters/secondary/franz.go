@@ -6,6 +6,7 @@ import (
 
 	"github.com/nxdir-s/IdleEngine/internal/adapters/secondary/franz"
 	"github.com/nxdir-s/IdleEngine/internal/util"
+	"github.com/twmb/franz-go/pkg/kadm"
 	"github.com/twmb/franz-go/pkg/kgo"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
@@ -15,9 +16,6 @@ import (
 
 const (
 	MaxPollFetches int = 1000
-
-	UserEventsTopic  string = "user.events"
-	UserUpdatesTopic string = "user.updates"
 )
 
 type ErrProtoMarshal struct {
@@ -26,6 +24,22 @@ type ErrProtoMarshal struct {
 
 func (e *ErrProtoMarshal) Error() string {
 	return "failed to marshal protobuf: " + e.err.Error()
+}
+
+type ErrCreateTopic struct {
+	err error
+}
+
+func (e *ErrCreateTopic) Error() string {
+	return "failed to create kafka topic: " + e.err.Error()
+}
+
+type ErrListTopics struct {
+	err error
+}
+
+func (e *ErrListTopics) Error() string {
+	return "failed to list kafka topics: " + e.err.Error()
 }
 
 type FranzAdapterOpt func(a *FranzAdapter) error
@@ -226,6 +240,49 @@ func (a *FranzAdapter) Close() error {
 	}
 
 	a.client.Close()
+
+	return nil
+}
+
+// CreateTopic creates a kafka topic
+func (a *FranzAdapter) CreateTopic(ctx context.Context, topic string) error {
+	if a.client == nil {
+		a.logger.Error("nil client in FranzAdapter")
+		return nil
+	}
+
+	ctx, span := a.tracer.Start(ctx, "create.topic "+a.topic,
+		trace.WithSpanKind(trace.SpanKindClient),
+		trace.WithAttributes(
+			attribute.String("messaging.system", "kafka"),
+			attribute.String("messaging.destination.name", topic),
+			attribute.String("messaging.operation.name", "create topic"),
+		),
+	)
+	defer span.End()
+
+	adminClient := kadm.NewClient(a.client)
+
+	topicDetails, err := adminClient.ListTopics(ctx)
+	if err != nil {
+		return &ErrListTopics{err}
+	}
+
+	if topicDetails.Has(topic) {
+		a.logger.Info("kafka topic already exists", slog.String("topic", topic))
+		return nil
+	}
+
+	a.logger.Info("creating kafka topic", slog.String("topic", topic))
+
+	if _, err := kadm.NewClient(a.client).CreateTopic(ctx, 1, -1, nil, topic); err != nil {
+		a.logger.Error("failed to create kafka topic",
+			slog.String("err", err.Error()),
+			slog.String("topic", topic),
+		)
+
+		return &ErrCreateTopic{err}
+	}
 
 	return nil
 }
