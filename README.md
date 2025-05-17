@@ -40,3 +40,5 @@ go run cmd/client/main.go ws://127.0.0.1:80/ws 100
 ### Kafka UI
 
 A Kafka UI for managing clusters can be accessed at the following address `http://127.0.0.1:80`
+
+> #### [Project Structure Docs](https://github.com/nxdir-s/go-hexarch)
