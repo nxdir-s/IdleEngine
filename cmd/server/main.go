@@ -28,13 +28,13 @@ func main() {
 
 	var rLimit syscall.Rlimit
 	if err := syscall.Getrlimit(syscall.RLIMIT_NOFILE, &rLimit); err != nil {
-		logger.Error("failed to get RLIMIT", slog.Any("err", err))
+		logger.Error("failed to get RLIMIT", slog.String("err", err.Error()))
 		os.Exit(1)
 	}
 
 	rLimit.Cur = rLimit.Max
 	if err := syscall.Setrlimit(syscall.RLIMIT_NOFILE, &rLimit); err != nil {
-		logger.Error("failed to set RLIMIT", slog.Any("err", err))
+		logger.Error("failed to set RLIMIT", slog.String("err", err.Error()))
 		os.Exit(1)
 	}
 
@@ -56,7 +56,7 @@ func main() {
 
 	// cleanup, err := telemetry.InitProviders(ctx, otelCfg)
 	// if err != nil {
-	// 	logger.Error("failed to initialize telemetry", slog.Any("err", err))
+	// 	logger.Error("failed to initialize telemetry", slog.String("err", err.Error()))
 	// 	os.Exit(1)
 	// }
 	// defer cleanup(ctx)
@@ -64,7 +64,7 @@ func main() {
 	var lc net.ListenConfig
 	listener, err := lc.Listen(ctx, "tcp", cfg.ListenerAddr)
 	if err != nil {
-		logger.Error("failed to create tcp listener", slog.Any("err", err))
+		logger.Error("failed to create tcp listener", slog.String("err", err.Error()))
 		os.Exit(1)
 	}
 
@@ -77,7 +77,7 @@ func main() {
 		secondary.WithProducer(cfg.UserEventsTopic, strings.Split(cfg.Brokers, ",")),
 	)
 	if err != nil {
-		logger.Error("failed to create kafka adapter", slog.Any("err", err))
+		logger.Error("failed to create kafka adapter", slog.String("err", err.Error()))
 		os.Exit(1)
 	}
 	defer kafka.Close()
@@ -89,7 +89,7 @@ func main() {
 
 	fd, err := unix.EpollCreate1(0)
 	if err != nil {
-		logger.Error("failed to create epoll", slog.Any("err", err))
+		logger.Error("failed to create epoll", slog.String("err", err.Error()))
 		os.Exit(1)
 	}
 

@@ -53,12 +53,12 @@ func (gs *GameServer) Start(ctx context.Context) {
 		default:
 			conn, err := gs.listener.Accept()
 			if err != nil {
-				gs.logger.Error("failed to accept tcp connection", slog.Any("err", err))
+				gs.logger.Error("failed to accept tcp connection", slog.String("err", err.Error()))
 				continue
 			}
 
 			if _, err = ws.Upgrade(conn); err != nil {
-				gs.logger.Error("failed to upgrade tcp connection", slog.Any("err", err))
+				gs.logger.Error("failed to upgrade tcp connection", slog.String("err", err.Error()))
 				continue
 			}
 
@@ -85,7 +85,7 @@ func (gs *GameServer) listen(ctx context.Context) {
 		default:
 			clients, err := gs.epoller.Wait()
 			if err != nil {
-				gs.logger.Error("failed to recieve epoll event", slog.Any("err", err))
+				gs.logger.Error("failed to recieve epoll event", slog.String("err", err.Error()))
 				continue
 			}
 
@@ -103,7 +103,7 @@ func (gs *GameServer) listen(ctx context.Context) {
 					return
 				default:
 					if err != nil {
-						gs.logger.Error("failed to read client message", slog.Any("err", err))
+						gs.logger.Error("failed to read client message", slog.String("err", err.Error()))
 					}
 				}
 			}

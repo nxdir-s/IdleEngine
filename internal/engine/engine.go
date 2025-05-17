@@ -111,7 +111,7 @@ func (ngin *GameEngine) process(ctx context.Context, users map[int32]*server.Cli
 			return
 		default:
 			if err != nil {
-				ngin.logger.Error("failed to send user event", slog.Any("err", err))
+				ngin.logger.Error("failed to send user event", slog.String("err", err.Error()))
 			}
 		}
 	}

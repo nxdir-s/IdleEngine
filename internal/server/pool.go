@@ -124,7 +124,7 @@ func (p *Pool) Start(ctx context.Context) {
 					return
 				default:
 					if err != nil {
-						p.logger.Error("failed to send message to client", slog.Any("err", err))
+						p.logger.Error("failed to send message to client", slog.String("err", err.Error()))
 					}
 				}
 			}
