@@ -33,6 +33,22 @@ services:
       - kafka-2
       - kafka-3
 
+  consumer:
+    image: consumer:latest
+    container_name: consumer
+    build:
+      context: .
+      dockerfile: ./cmd/consumer/Dockerfile
+    restart: unless-stopped
+    environment:
+      BROKERS: kafka-1:19092,kafka-2:19092,kafka-3:19092
+      CONSUMER_GROUP_NAME: userevents
+      USER_EVENTS_TOPIC: user.events
+    depends_on:
+      - kafka-1
+      - kafka-2
+      - kafka-3
+
   controller-1:
     image: apache/kafka:latest
     container_name: controller-1
