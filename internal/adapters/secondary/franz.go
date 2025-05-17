@@ -76,6 +76,7 @@ type FranzAdapter struct {
 	groupName string
 }
 
+// NewFranzAdapter creates a new kafka adapter. Adapters should be configured to either produce or consume, but not both
 func NewFranzAdapter(logger *slog.Logger, tracer trace.Tracer, opts ...FranzAdapterOpt) (*FranzAdapter, error) {
 	adapter := &FranzAdapter{
 		logger: logger,
@@ -91,6 +92,7 @@ func NewFranzAdapter(logger *slog.Logger, tracer trace.Tracer, opts ...FranzAdap
 	return adapter, nil
 }
 
+// Send sends the supplied kafka record to the configured topic
 func (a *FranzAdapter) Send(ctx context.Context, record protoreflect.ProtoMessage) error {
 	if a.client == nil {
 		a.logger.Error("nil client in FranzAdapter")
@@ -111,7 +113,7 @@ func (a *FranzAdapter) Send(ctx context.Context, record protoreflect.ProtoMessag
 	data, err := proto.Marshal(record)
 	if err != nil {
 		a.logger.Error("error encoding record",
-			slog.Any("err", err),
+			slog.String("err", err.Error()),
 			slog.String("topic", a.topic),
 		)
 
@@ -123,11 +125,16 @@ func (a *FranzAdapter) Send(ctx context.Context, record protoreflect.ProtoMessag
 
 	a.logger.Debug("sending kafka record")
 
-	a.client.Produce(ctx, &kgo.Record{Topic: a.topic, Value: data}, nil)
+	a.client.Produce(ctx, &kgo.Record{Topic: a.topic, Value: data}, func(_ *kgo.Record, err error) {
+		if err != nil {
+			a.logger.Error("record had a produce error", slog.Any("err", err))
+		}
+	})
 
 	return nil
 }
 
+// Consume uses the supplied consumer to process kafka records from the configured topic
 func (a *FranzAdapter) Consume(ctx context.Context, consumer franz.Consumer) {
 	if a.client == nil {
 		a.logger.Error("nil client in FranzAdapter")
@@ -165,7 +172,7 @@ func (a *FranzAdapter) Consume(ctx context.Context, consumer franz.Consumer) {
 			if errors := fetches.Errors(); len(errors) > 0 {
 				for _, e := range errors {
 					if e.Err == context.Canceled {
-						a.logger.Error("received interrupt", slog.Any("err", e.Err))
+						a.logger.Error("received interrupt", slog.String("err", e.Err.Error()))
 
 						util.RecordError(span, "received interrupt", e.Err)
 						span.End()
@@ -173,7 +180,7 @@ func (a *FranzAdapter) Consume(ctx context.Context, consumer franz.Consumer) {
 						return
 					}
 
-					a.logger.Error("poll error", slog.Any("err", e))
+					a.logger.Error("poll error", slog.String("err", e.Err.Error()))
 				}
 			}
 
@@ -182,7 +189,7 @@ func (a *FranzAdapter) Consume(ctx context.Context, consumer franz.Consumer) {
 				record := iter.Next()
 
 				if err := consumer.Process(ctx, record); err != nil {
-					a.logger.Error("error processing "+a.topic+" record", slog.Any("err", err))
+					a.logger.Error("error processing "+a.topic+" record", slog.String("err", err.Error()))
 
 					util.RecordError(span, "error processing "+a.topic+" record", err)
 					span.End()
@@ -195,7 +202,7 @@ func (a *FranzAdapter) Consume(ctx context.Context, consumer franz.Consumer) {
 
 			if err := a.client.CommitUncommittedOffsets(ctx); err != nil {
 				if err == context.Canceled {
-					a.logger.Error("received interrupt", slog.Any("err", err))
+					a.logger.Error("received interrupt", slog.String("err", err.Error()))
 
 					util.RecordError(span, "received interrupt", err)
 					span.End()
@@ -203,7 +210,7 @@ func (a *FranzAdapter) Consume(ctx context.Context, consumer franz.Consumer) {
 					return
 				}
 
-				a.logger.Error("unable to commit offsets", slog.Any("err", err))
+				a.logger.Error("unable to commit offsets", slog.String("err", err.Error()))
 			}
 
 			a.client.AllowRebalance()
@@ -212,6 +219,7 @@ func (a *FranzAdapter) Consume(ctx context.Context, consumer franz.Consumer) {
 	}
 }
 
+// Close closes the kafka client
 func (a *FranzAdapter) Close() error {
 	if a.client == nil {
 		return nil
