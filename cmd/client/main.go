@@ -86,7 +86,7 @@ func startWS(ctx context.Context, wg *sync.WaitGroup, addr string, logger *slog.
 			case websocket.MessageText:
 				logger.Info(string(msg))
 			case websocket.MessageBinary:
-				logger.Info("recieved binary message")
+				logger.Info("received binary message")
 			default:
 				logger.Warn("unknown websocket frame type", slog.Any("msgType", msgType))
 				return

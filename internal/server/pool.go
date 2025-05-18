@@ -108,7 +108,7 @@ func (p *Pool) Start(ctx context.Context) {
 		case event := <-p.Broadcast:
 			ctx, span := p.tracer.Start(event.Ctx, "pool broadcast")
 
-			p.logger.Info("recieved event to broadcast", slog.String("msg", event.Msg.Value))
+			p.logger.Info("received event to broadcast", slog.String("msg", event.Msg.Value))
 
 			sendMsg := func(ctx context.Context, client *Client) error {
 				return client.SendMessage(ctx, event.Msg)

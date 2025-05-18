@@ -85,7 +85,7 @@ func (gs *GameServer) listen(ctx context.Context) {
 		default:
 			clients, err := gs.epoller.Wait()
 			if err != nil {
-				gs.logger.Error("failed to recieve epoll event", slog.String("err", err.Error()))
+				gs.logger.Error("failed to receive epoll event", slog.String("err", err.Error()))
 				continue
 			}
 
