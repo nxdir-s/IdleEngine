@@ -1,3 +1,5 @@
+[![Go Report Card](https://goreportcard.com/badge/github.com/nxdir-s/IdleEngine)](https://goreportcard.com/report/github.com/nxdir-s/IdleEngine)
+
 # IdleEngine
 
 IdleEngine is a game engine written in Go for idle/incremental type games. Players connect to the game server via websockets and have their actions processed at set intervals
