@@ -85,7 +85,7 @@ func (e *Epoll) Wait() ([]*Client, error) {
 }
 
 func (e *Epoll) add(ctx context.Context, conn net.Conn) error {
-	ctx, span := e.tracer.Start(ctx, "epoll add")
+	_, span := e.tracer.Start(ctx, "epoll add")
 	defer span.End()
 
 	fd, err := e.getFileDescriptor(conn)
@@ -116,7 +116,7 @@ func (e *Epoll) add(ctx context.Context, conn net.Conn) error {
 }
 
 func (e *Epoll) remove(ctx context.Context, client *Client) error {
-	ctx, span := e.tracer.Start(ctx, "epoll remove")
+	_, span := e.tracer.Start(ctx, "epoll remove")
 	defer span.End()
 
 	fd, err := e.getFileDescriptor(client.Conn)

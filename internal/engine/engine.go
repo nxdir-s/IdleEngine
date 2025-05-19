@@ -9,6 +9,7 @@ import (
 	"github.com/nxdir-s/IdleEngine/internal/core/valobj"
 	"github.com/nxdir-s/IdleEngine/internal/ports"
 	"github.com/nxdir-s/IdleEngine/internal/server"
+	"github.com/nxdir-s/IdleEngine/internal/util"
 	"github.com/nxdir-s/IdleEngine/protobuf"
 	"github.com/nxdir-s/pipelines"
 	"go.opentelemetry.io/otel/trace"
@@ -16,6 +17,8 @@ import (
 )
 
 const (
+	SimulateMaxExp int32 = 100
+
 	SimulateMaxFan int = 3
 	KafkaMaxFan    int = 3
 
@@ -119,8 +122,11 @@ func (ngin *GameEngine) process(ctx context.Context, users map[int32]*server.Cli
 
 // Simulate simulates user events
 func (ngin *GameEngine) Simulate(ctx context.Context, client *server.Client) protoreflect.ProtoMessage {
+	rand := util.NewRand()
+
 	return &protobuf.UserEvent{
-		Id: client.User.Id,
+		Id:  client.User.Id,
+		Exp: rand.Int32N(SimulateMaxExp),
 	}
 }
 
