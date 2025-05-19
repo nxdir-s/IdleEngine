@@ -2,6 +2,8 @@ package util
 
 import (
 	"fmt"
+	"hash/maphash"
+	"math/rand/v2"
 	"os"
 	"time"
 
@@ -20,4 +22,12 @@ func Timer(name string) func() {
 	return func() {
 		fmt.Fprintf(os.Stdout, "%s finished, duration: %s\n", name, time.Since(start).String())
 	}
+}
+
+func NewRand() *rand.Rand {
+	return rand.New(rand.NewPCG(rand64(), rand64()))
+}
+
+func rand64() uint64 {
+	return new(maphash.Hash).Sum64()
 }
