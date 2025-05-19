@@ -7,8 +7,10 @@ option go_package = "protobuf/";
 
 message UserEvent {
     int32 id = 1;
+    int32 exp = 2;
 }
 
 message UserUpdate {
     int32 id = 1;
+    int32 exp = 2;
 }
